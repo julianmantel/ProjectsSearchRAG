@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/ProjectsSearchRAG.App/ProjectsSearchRAG.App.csproj" />
+    <Project Path="src/ProjectsSearchRAG.Core/ProjectsSearchRAG.Core.csproj" />
+    <Project Path="src/ProjectsSearchRAG.Data/ProjectsSearchRAG.Data.csproj" />
+    <Project Path="src/ProjectsSearchRAG.Infrastructure/ProjectsSearchRAG.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ProjectsSearchRAG.Tests/ProjectsSearchRAG.Tests.csproj" />
+  </Folder>
+</Solution>

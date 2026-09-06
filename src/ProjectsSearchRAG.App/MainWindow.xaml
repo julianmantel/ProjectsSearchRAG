@@ -1,0 +1,430 @@
+<Window x:Class="ProjectsSearchRAG.App.MainWindow"
+        Icon="{StaticResource Icon.LogoImage}"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:ProjectsSearchRAG.App.ViewModels"
+        xmlns:conv="clr-namespace:ProjectsSearchRAG.App.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance Type=vm:MainViewModel}"
+        Title="{Binding Title, FallbackValue='Semantic Code Search - RAG'}"
+        Height="850" Width="1300"
+        MinHeight="700" MinWidth="1000"
+        WindowStartupLocation="CenterScreen"
+        WindowState="Maximized"
+        Background="{StaticResource AppBg}"
+        Foreground="{StaticResource TextPrimaryBrush}"
+        FontFamily="{StaticResource UIFont}"
+        SnapsToDevicePixels="True"
+        UseLayoutRounding="True">
+
+    <Window.Resources>
+        <conv:CountToVisibilityConverter x:Key="CountToVisibility" />
+        <conv:StringToVisibilityConverter x:Key="StringToVisibility" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- ==================== HEADER (native Windows title bar above this) ==================== -->
+        <Grid Grid.Row="0" Background="{StaticResource HeaderBg}" Margin="16,10,16,10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="6,6,10,6">
+                <Ellipse Width="7" Height="9" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0" />
+                <TextBlock Text="ProjectsSearchRAG" Style="{StaticResource Text.Brand}" />
+                <TextBlock Text=" | " Style="{StaticResource Text.BrandPath}" />
+                <TextBlock Text="{Binding SourceDirectory, FallbackValue='source'}"
+                           Style="{StaticResource Text.BrandPath}"
+                           TextTrimming="CharacterEllipsis" MaxWidth="400" />
+            </StackPanel>
+
+            <Button Grid.Column="1"
+                    Command="{Binding SelectDirectoryCommand}"
+                    Style="{StaticResource Button.Primary}"
+                    AutomationProperties.Name="Change base projects directory">
+                <StackPanel Orientation="Horizontal" Margin="10,0,10,0">
+                    <Path Data="{StaticResource Icon.Folder}" Stroke="White" StrokeThickness="1.6"
+                          Stretch="Uniform" Width="14" Height="14" Margin="0,0,8,0" />
+                    <TextBlock Text="Select directory" />
+                </StackPanel>
+            </Button>
+        </Grid>
+        <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{StaticResource BorderBrush}" />
+
+        <!-- ==================== BODY ==================== -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.3*" MinWidth="230" MaxWidth="360" />
+                <ColumnDefinition Width="0.7*" MinWidth="340" />
+            </Grid.ColumnDefinitions>
+
+            <!-- ===== SIDEBAR ===== -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <!-- Header sidebar -->
+                <Grid Grid.Row="0" Margin="16,16,16,16">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Projects" Style="{StaticResource Text.SectionTitle}" VerticalAlignment="Center" />
+                        <Border Style="{StaticResource Badge.Count}" Margin="8,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Projects.Count}" Style="{StaticResource Text.Caption}" />
+                        </Border>
+                    </StackPanel>
+                </Grid>
+                <Border Grid.Row="0" Height="1" VerticalAlignment="Bottom" Background="{StaticResource BorderBrush}" />
+
+                <!-- Project list, or empty state -->
+                <Grid Grid.Row="1">
+                    <!-- Empty state -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Margin="24,0"
+                                Visibility="{Binding Projects.Count, Converter={StaticResource CountToVisibility}, ConverterParameter=Invert}">
+                        <Border Width="60" Height="52" CornerRadius="10" Background="{StaticResource CardBg}"
+                                BorderBrush="{StaticResource BorderStrongBrush}" BorderThickness="1"
+                                HorizontalAlignment="Center">
+                            <Path Data="{StaticResource Icon.FolderEmpty}" Stroke="{StaticResource TextFaintBrush}"
+                                  StrokeThickness="1.4" Stretch="Uniform" Width="30" Height="26" />
+                        </Border>
+                        <TextBlock Text="No projects yet" Style="{StaticResource Text.UI}"
+                                   FontWeight="SemiBold" Margin="0,16,0,6" HorizontalAlignment="Center" />
+                        <TextBlock Text="Select a folder to analyze .cs, .tsx, .ts, .js, .sql and .json files."
+                                   Style="{StaticResource Text.Caption}" TextWrapping="Wrap"
+                                   TextAlignment="Center" MaxWidth="220" />
+                    </StackPanel>
+
+                    <!-- Real list -->
+                    <ListBox Margin="8,0,8,0"
+                             ItemsSource="{Binding Projects}"
+                             SelectedItem="{Binding SelectedProject}"
+                             Style="{StaticResource ListBox.Flat}"
+                             Visibility="{Binding Projects.Count, Converter={StaticResource CountToVisibility}}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4,2">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <DockPanel Grid.Row="0" LastChildFill="False" Margin="8,8,8,0">
+                                        <TextBlock Text="{Binding Name}" DockPanel.Dock="Left"
+                                                   Style="{StaticResource Text.UI}" FontWeight="SemiBold"
+                                                   TextTrimming="CharacterEllipsis" />
+                                        <Button DockPanel.Dock="Right"
+                                                Command="{Binding DataContext.ExcludeProjectCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                CommandParameter="{Binding}"
+                                                ToolTip="Remove from the list without indexing"
+                                                Content="&#x2715;" VerticalAlignment="Center">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource Button.Danger}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsIndexed}" Value="False">
+                                                            <Setter Property="Visibility" Value="Visible" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+                                    </DockPanel>
+
+                                    <DockPanel Grid.Row="1" Margin="8,3,8,8">
+                                        <TextBlock Text="{Binding Path}" DockPanel.Dock="Left"
+                                                   Style="{StaticResource Text.Caption}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center" HorizontalAlignment="Right">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock" BasedOn="{StaticResource Text.Caption}">
+                                                    <Setter Property="Text" Value="Not indexed" />
+                                                    <Setter Property="Foreground" Value="#FBBF24" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsIndexed}" Value="True">
+                                                            <Setter Property="Text" Value="Indexed" />
+                                                            <Setter Property="Foreground" Value="{StaticResource SuccessBrush}" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DockPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <!-- Actions -->
+                <StackPanel Grid.Row="2" Margin="14,8,14,16">
+                    <Button Command="{Binding ScanDirectoryCommand}"
+                            Margin="0,0,0,8" Height="33">
+                        <Button.Content>
+                            <TextBlock Text="Scan directory" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Button.Content>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource Button.Ghost}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <Button Command="{Binding IndexNewProjectsCommand}" Height="31" >
+                        <Button.Content >
+                            <TextBlock Text="Index new projects" TextWrapping="Wrap" TextAlignment="Center" />
+                        </Button.Content>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource Button.Primary}">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding HasUnindexedProjects}" Value="False">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Divider -->
+            <Border Grid.Column="0" Width="1" HorizontalAlignment="Right" Background="{StaticResource BorderBrush}" />
+
+            <!-- ===== MAIN ===== -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="220" MinHeight="140" />
+                    <RowDefinition Height="40" />
+                </Grid.RowDefinitions>
+
+                <!-- Question row -->
+                <Grid Grid.Row="0" Margin="28,24,28,20">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+<Grid Grid.Row="0" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="Asking about:" Style="{StaticResource Text.Caption}" VerticalAlignment="Center" />
+                            <Border Style="{StaticResource Badge.Accent}" Margin="8,0,0,0">
+                                <TextBlock Text="{Binding SelectedProject.Name, FallbackValue='no project'}"
+                                           Style="{StaticResource Text.UI}" FontWeight="SemiBold"
+                                           Foreground="{StaticResource AccentBrush}"
+                                           TextTrimming="CharacterEllipsis" MaxWidth="260" />
+                            </Border>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Height="36" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <TextBlock Text="Model:" Style="{StaticResource Text.Caption}" VerticalAlignment="Center" Margin="16,0,0,0" />
+                            <ComboBox Style="{StaticResource ComboBox.ModelPick}"
+                                      ItemsSource="{Binding GeminiModels}"
+                                      SelectedItem="{Binding SelectedChatModel}"
+                                      VerticalAlignment="Center"
+                                      Margin="8,0,0,0"
+                                      MinWidth="170"
+                                      AutomationProperties.Name="Gemini model" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid Grid.Column="0">
+                            <TextBox x:Name="SearchBox"
+                                     Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     Padding="40,13,14,13">
+                                <TextBox.InputBindings>
+                                    <KeyBinding Key="Enter" Command="{Binding AskQuestionCommand}" />
+                                </TextBox.InputBindings>
+                            </TextBox>
+                            <Path Data="{StaticResource Icon.Search}" Stroke="{StaticResource TextFaintBrush}"
+                                  StrokeThickness="1.4" Stretch="Uniform" Width="15" Height="15"
+                                  HorizontalAlignment="Left" Margin="14,0,0,0" IsHitTestVisible="False" />
+                            <TextBlock Text="Ask where a function is implemented, how data flows or which files are related…"
+                                       Style="{StaticResource Text.Caption}"
+                                       Margin="40,0,14,0" VerticalAlignment="Center"
+                                       IsHitTestVisible="False" TextTrimming="CharacterEllipsis"
+                                       Visibility="{Binding Text, ElementName=SearchBox, Converter={StaticResource StringToVisibility}, ConverterParameter=Invert}" />
+                        </Grid>
+
+                        <Button Grid.Column="1" Command="{Binding AskQuestionCommand}" Margin="10,0,0,0">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource Button.Primary}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsBusy}" Value="True">
+                                            <Setter Property="IsEnabled" Value="False" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal" Margin="10,0,10,0">
+                                <TextBlock Text="Ask" Margin="0,0,8,0" />
+                                <Path Data="{StaticResource Icon.Arrow}" Stroke="White" StrokeThickness="1.6"
+                                      Stretch="Uniform" Width="12" Height="10" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Grid>
+
+                <!-- Welcome hero, or answer -->
+                <Grid Grid.Row="1">
+                    <!-- Hero: visible while there is no answer -->
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" MaxWidth="620"
+                                Visibility="{Binding ResponseAnswer, Converter={StaticResource StringToVisibility}, ConverterParameter=Invert}">
+                        <Border Width="67" Height="67" CornerRadius="13.5" Background="{StaticResource CardBg}"
+                                BorderBrush="{StaticResource BorderStrongBrush}" BorderThickness="1"
+                                HorizontalAlignment="Center">
+                            <Path Data="{StaticResource Icon.Graph}" Stroke="{StaticResource AccentBrush}"
+                                  StrokeThickness="1.4" Stretch="Uniform" Width="30" Height="30" />
+                        </Border>
+
+                        <TextBlock Text="Understands your code, not just its words"
+                                   Style="{StaticResource Text.HeroTitle}" Margin="0,20,0,12" />
+                        <TextBlock Style="{StaticResource Text.HeroSubtitle}">
+                            Index a project and ask questions in natural language. The assistant
+                            will find implementations, dependencies and fragments related by meaning.
+                        </TextBlock>
+
+                        <WrapPanel HorizontalAlignment="Center" Margin="0,24,0,0">
+                            <Border Style="{StaticResource Card.Suggestion}" Width="180" Margin="6">
+                                <StackPanel>
+                                    <TextBlock Text="FLOW" Style="{StaticResource Text.ChipLabel}" Margin="0,0,0,8" />
+                                    <TextBlock Text="How does authentication work?" Style="{StaticResource Text.ChipQuestion}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource Card.Suggestion}" Width="180" Margin="6">
+                                <StackPanel>
+                                    <TextBlock Text="DATA" Style="{StaticResource Text.ChipLabel}" Margin="0,0,0,8" />
+                                    <TextBlock Text="Where is the configuration stored?" Style="{StaticResource Text.ChipQuestion}" />
+                                </StackPanel>
+                            </Border>
+                            <Border Style="{StaticResource Card.Suggestion}" Width="180" Margin="6">
+                                <StackPanel>
+                                    <TextBlock Text="IMPACT" Style="{StaticResource Text.ChipLabel}" Margin="0,0,0,8" />
+                                    <TextBlock Text="What does this service use?" Style="{StaticResource Text.ChipQuestion}" />
+                                </StackPanel>
+                            </Border>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <!-- Answer -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                                  Visibility="{Binding ResponseAnswer, Converter={StaticResource StringToVisibility}}">
+                        <TextBox Text="{Binding ResponseAnswer, Mode=OneWay}" IsReadOnly="True" TextWrapping="Wrap"
+                                 Background="Transparent" BorderThickness="0"
+                                 FontFamily="{StaticResource MonoFont}" FontSize="13"
+                                 Foreground="{StaticResource TextPrimaryBrush}" Padding="28,16" />
+                    </ScrollViewer>
+                </Grid>
+
+                <GridSplitter Grid.Row="2" Style="{StaticResource GridSplitter.Horizontal}" />
+
+                <!-- Sources -->
+                <Grid Grid.Row="3">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="28,14,28,12">
+                        <TextBlock Text="Sources" Style="{StaticResource Text.SectionTitle}" VerticalAlignment="Center" />
+                        <Border Style="{StaticResource Badge.Count}" Margin="8,0,0,0" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding CitedChunks.Count}" Style="{StaticResource Text.Caption}" />
+                        </Border>
+                    </StackPanel>
+
+                    <TextBlock Grid.Row="0" Text="Cited files will appear here"
+                               Style="{StaticResource Text.Caption}" HorizontalAlignment="Right"
+                               VerticalAlignment="Center" Margin="0,0,28,0"
+                               Visibility="{Binding CitedChunks.Count, Converter={StaticResource CountToVisibility}, ConverterParameter=Invert}" />
+
+                    <ListBox Grid.Row="1" Margin="20,0,20,8"
+                             ItemsSource="{Binding CitedChunks}"
+                             Style="{StaticResource ListBox.Flat}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="8,6">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+
+                                    <DockPanel Grid.Row="0" LastChildFill="False">
+                                        <TextBlock Text="{Binding FilePath}" DockPanel.Dock="Left"
+                                                   Style="{StaticResource Text.UI}" FontFamily="{StaticResource MonoFont}"
+                                                   FontSize="12" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource Text.Caption}">
+                                            <Run Text="{Binding ClassName, StringFormat='{}{0}', TargetNullValue=''}" />
+                                        </TextBlock>
+                                    </DockPanel>
+
+                                    <DockPanel Grid.Row="1" Margin="0,2,0,0" LastChildFill="False">
+                                        <TextBlock DockPanel.Dock="Left" Style="{StaticResource Text.Caption}"
+                                                   Foreground="{StaticResource SuccessBrush}">
+                                            <Run Text="{Binding MethodName, TargetNullValue=''}" />
+                                            <Run Text="{Binding Language, StringFormat=' ({0})', TargetNullValue=''}" />
+                                        </TextBlock>
+                                        <TextBlock DockPanel.Dock="Right" Style="{StaticResource Text.Caption}">
+                                            <Run Text="{Binding StartLine}" /><Run Text="&#x2013;" /><Run Text="{Binding EndLine}" />
+                                        </TextBlock>
+                                    </DockPanel>
+
+                                    <TextBlock Grid.Row="2" Margin="0,4,0,0" Style="{StaticResource Text.Caption}"
+                                               FontFamily="{StaticResource MonoFont}" Text="{Binding Content}"
+                                               MaxHeight="40" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap" />
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+
+                <!-- Status bar: only under the main content, NOT under the sidebar
+                     (as confirmed by the SVG: x=300, not x=0 — an easy detail to
+                     miss when looking at the screenshot only). -->
+                <Border Grid.Row="4" Background="{StaticResource PanelBg}">
+                    <Grid Margin="20,0,20,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0" Orientation="Horizontal">
+                            <Ellipse Width="7" Height="7" Fill="{StaticResource SuccessBrush}" Margin="0,0,8,0" />
+                            <TextBlock Text="{Binding StatusMessage, FallbackValue='Ready to scan a directory'}"
+                                       Style="{StaticResource Text.Status}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="1" Style="{StaticResource Text.Status}"
+                                   Text=".NET 10  ·  Gemini  ·  pgvector" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

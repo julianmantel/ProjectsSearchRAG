@@ -1,0 +1,38 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Paleta extraída directamente del SVG de referencia (no aproximada) -->
+    <SolidColorBrush x:Key="AppBg" Color="#0D0C14" />
+    <SolidColorBrush x:Key="HeaderBg" Color="#181624" />
+    <SolidColorBrush x:Key="PanelBg" Color="#14121D" />
+    <SolidColorBrush x:Key="CardBg" Color="#1D1A2A" />
+    <SolidColorBrush x:Key="BadgeBg" Color="#242035" />
+
+    <SolidColorBrush x:Key="BorderBrush" Color="#302B43" />
+    <SolidColorBrush x:Key="BorderStrongBrush" Color="#433B62" />
+
+    <!-- Violeta apagado: pill "ningún proyecto", botón primario en estado deshabilitado -->
+    <SolidColorBrush x:Key="MutedAccentBrush" Color="#382A72" />
+
+    <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F6F3FF" />
+    <SolidColorBrush x:Key="TextMutedBrush" Color="#9B95B3" />
+    <SolidColorBrush x:Key="TextFaintBrush" Color="#6F6888" />
+
+    <SolidColorBrush x:Key="AccentBrush" Color="#7657F6" />
+    <SolidColorBrush x:Key="AccentEndBrush" Color="#5B8EF7" />
+    <SolidColorBrush x:Key="SuccessBrush" Color="#4FD1A1" />
+
+    <!-- El único degradado del sistema: botón "Seleccionar directorio" y "Preguntar" -->
+    <LinearGradientBrush x:Key="AccentGradientBrush" StartPoint="0,0" EndPoint="0,1">
+        <GradientStop Color="#7657F6" Offset="0" />
+        <GradientStop Color="#5B8EF7" Offset="1" />
+    </LinearGradientBrush>
+
+    <DropShadowEffect x:Key="AccentGlow"
+                       Color="#7657F6"
+                       Opacity="0.35"
+                       BlurRadius="20"
+                       ShadowDepth="4"
+                       Direction="270" />
+
+</ResourceDictionary>
