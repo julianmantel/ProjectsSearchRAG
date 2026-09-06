@@ -73,8 +73,6 @@ dotnet test
 ## Estructura del proyecto
 
 ```
-docs/
-  images/                          # Capturas de pantalla usadas en el README
 src/
   ProjectsSearchRAG.App            # Aplicación WPF (Vista, ViewModels, Resources)
   ProjectsSearchRAG.Core           # Lógica de dominio: escaneo, chunking, embeddings, RAG
