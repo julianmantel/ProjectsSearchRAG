@@ -4,11 +4,25 @@ Aplicación de escritorio **WPF (.NET 10)** que permite buscar y consultar códi
 
 ## Características
 
-- Escaneo e indexación de proyectos (C#, TypeScript/TSX, JavaScript, SQL y JSON).
+- Escaneo e indexación de proyectos (solo archivos `.cs`, `.tsx`, `.ts`, `.js`, `.sql` y `.json`; por el momento no se agregan más extensiones automáticamente).
 - Vectorización de chunks de código con `gemini-embedding-001` (dimensión 768).
 - Búsqueda semántica por similitud coseno vía `pgvector`.
 - Chat con contexto recuperado usando `gemini-2.5-flash`.
 - Migraciones de base de datos aplicadas automáticamente al iniciar la app.
+
+## Imágenes del proyecto
+
+### 1. Ventana principal
+
+![Ventana principal](docs/images/ventana-principal.png)
+
+### 2. Respuesta con fuentes citadas
+
+![Respuesta RAG](docs/images/respuesta-rag.png)
+
+### 3. Proyectos indexados
+
+![Proyectos indexados](docs/images/proyectos-indexados.png)
 
 ## Requisitos
 
@@ -27,18 +41,14 @@ Aplicación de escritorio **WPF (.NET 10)** que permite buscar y consultar códi
 2. Completa `.env` con tus credenciales:
 
    ```
-   ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database=projects_search_rag;Username=postgres;Password=mi_password
-   Gemini__ApiKey=TU_CLAVE_GEMINI
+   ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database={Nombre_BD};Username={Nombre};Password={Contraseña}
+   Gemini__ApiKey=TU_CLAVE_API_GEMINI
    Gemini__EmbeddingModel=gemini-embedding-001
    Gemini__EmbeddingDimension=768
    Gemini__ChatModel=gemini-2.5-flash
    ```
 
    > El archivo `.env` está ignorado por git y **nunca se sube** al repositorio.
-
-   También puedes configurar las mismas variables como variables de entorno de tu sistema.
-
-   > **Nota**: si `ConnectionStrings__DefaultConnection` queda vacío, la app usa como respaldo `Host=localhost;Port=5432;Database=projects_search_rag;Username=postgres;Password=postgres`. Define tu propia conexión para usar tu servidor real.
 
 3. Aplica la migración inicial (opcional: la app la aplica sola al arrancar):
 
@@ -63,6 +73,8 @@ dotnet test
 ## Estructura del proyecto
 
 ```
+docs/
+  images/                          # Capturas de pantalla usadas en el README
 src/
   ProjectsSearchRAG.App            # Aplicación WPF (Vista, ViewModels, Resources)
   ProjectsSearchRAG.Core           # Lógica de dominio: escaneo, chunking, embeddings, RAG

@@ -12,9 +12,6 @@ namespace ProjectsSearchRAG.Data;
 
 public static class DependencyInjection
 {
-    private const string DefaultConnectionString =
-        "Host=localhost;Port=5432;Database=projects_search_rag;Username=postgres;Password=postgres";
-
     public static IServiceCollection AddData(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<DatabaseOptions>(configuration.GetSection(DatabaseOptions.SectionName));
@@ -23,16 +20,12 @@ public static class DependencyInjection
                          ?? configuration.GetSection("ConnectionStrings:DefaultConnection").Value
                          ?? string.Empty;
 
-        var connectionString = string.IsNullOrWhiteSpace(configured)
-            ? DefaultConnectionString
-            : configured;
-
         services.AddDbContext<AppDbContext>((serviceProvider, options) =>
         {
             var dbOptions = serviceProvider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             var conn = !string.IsNullOrWhiteSpace(dbOptions.DefaultConnection)
                 ? dbOptions.DefaultConnection
-                : connectionString;
+                : configured;
 
             options.UseNpgsql(conn, npgsqlOptions =>
             {

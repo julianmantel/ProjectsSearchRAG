@@ -24,7 +24,9 @@ public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
 
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            connectionString = "Host=localhost;Port=5432;Database=projects_search_rag;Username=postgres;Password=postgres";
+            throw new InvalidOperationException(
+                "ConnectionStrings__DefaultConnection environment variable is not set. " +
+                "Define it before running 'dotnet ef' (see README.md / .env.example).");
         }
 
         return connectionString;
